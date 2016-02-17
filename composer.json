@@ -1,0 +1,22 @@
+{
+    "name": "perinatologie/hub-client-php",
+    "description": "",
+    "homepage": "https://github.com/perinatologie/hub-client-php",
+    "keywords": ["hub", "perinatologie", "verloskunde", "gynaecologie", "echoscopie", "kraamzorg"],
+    "type": "application",
+    "authors": [
+        {
+            "name": "Perinatologie Engineering",
+            "role": "Development"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "~4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hub\\Client\\": "src/"
+        }
+    },
+    "license": "MIT"
+}
