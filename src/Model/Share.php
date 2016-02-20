@@ -43,4 +43,18 @@ class Share
         $this->identifierType = $identifierType;
         return $this;
     }
+    
+    private $permission;
+    
+    public function getPermission()
+    {
+        return $this->permission;
+    }
+    
+    public function setPermission($permission)
+    {
+        $this->permission = $permission;
+        return $this;
+    }
+    
 }

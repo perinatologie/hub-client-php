@@ -6,6 +6,7 @@ class Resource
 {
     
     protected $type;
+    protected $shares = array();
     
     public function getType()
     {
@@ -15,6 +16,7 @@ class Resource
     public function setType($type)
     {
         $this->type = $type;
+        return $this;
     }
     
     private $properties = array();
@@ -22,6 +24,7 @@ class Resource
     public function addProperty(Property $property)
     {
         $this->properties[$property->getName()] = $property;
+        return $this;
     }
     
     public function hasProperty($name)
@@ -41,9 +44,21 @@ class Resource
     
     public function addPropertyValue($name, $value)
     {
+        $name = (string)$name;
         $value = (string)$value;
         $property = new Property($name, $value);
         $this->addProperty($property);
         return $this;
+    }
+    
+    public function addShare(Share $share)
+    {
+        $this->shares[] = $share;
+        return $this;
+    }
+    
+    public function getShares()
+    {
+        return $this->shares;
     }
 }

@@ -2,6 +2,6 @@
 
 namespace Hub\Client\Exception;
 
-class BadRequestException extends Exception
+class BadRequestException extends ResponseException
 {
 }

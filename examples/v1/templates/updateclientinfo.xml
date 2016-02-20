@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<client>
+    <bsn>909090908</bsn>
+    <birthdate>04121982</birthdate>
+    <zisnummer>20048013028</zisnummer>
+    <firstname>Sample Firstname2</firstname>
+    <lastname>Sample Lastname2</lastname>
+    <eocs>
+        <eoc>
+            <reference>G6 2016</reference>
+            <gravida>6</gravida>
+            <para>5</para>
+            <starttimestamp>26012015</starttimestamp>
+            <edd>02112015</edd>
+            <teammember>
+                <name>Demo Hospital</name>
+                <agb>08009876</agb>
+                <permission>full</permission>
+            </teammember>
+            <teammember>
+                <name>Demo Practice</name>
+                <agb>08000000</agb>
+                <permission>full</permission>
+            </teammember>
+        </eoc>
+        <eoc>
+            <reference>G7 2016</reference>
+            <gravida>7</gravida>
+            <para>6</para>
+            <starttimestamp>01012016</starttimestamp>
+            <edd>31122016</edd>
+            <teammember>
+                <name>Demo Practice</name>
+                <agb>08000000</agb>
+                <permission>full</permission>
+            </teammember>
+        </eoc>
+    </eocs>
+    <providers>
+        <provider>
+            <agb>08000000</agb>
+        </provider>
+    </providers>
+</client>

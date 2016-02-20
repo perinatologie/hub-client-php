@@ -8,6 +8,7 @@ use Hub\Client\Exception\BadRequestException;
 use Hub\Client\Exception\NotFoundException;
 use GuzzleHttp\Client as GuzzleClient;
 use RuntimeException;
+use SimpleXMLElement;
 
 class Client
 {
@@ -37,12 +38,16 @@ class Client
                         throw new NotFoundException((string)$rootNode->code, (string)$rootNode->message);
                         break;
                     default:
-                        throw new RuntimeException("Unsupported response status code returned: " . (string)$rootNode->status . ' / ' . (string)$rootNode->code);
+                        throw new RuntimeException(
+                            "Unsupported response status code returned: " .
+                            (string)$rootNode->status . ' / ' . (string)$rootNode->code
+                        );
                         break;
                 }
-                print_r($rootNode->getName());
             }
-            throw new RuntimeException("Failed to parse response. It's valid XML, but not the expected error root element");
+            throw new RuntimeException(
+                "Failed to parse response. It's valid XML, but not the expected error root element"
+            );
         }
 
         throw new RuntimeException("Failed to parse response: " . $xml);
@@ -57,15 +62,24 @@ class Client
             // stripping http(s) because of load-balancer. Hub sees http only
             $securityHash = sha1(str_replace('https', 'http', $hashSource));
             //echo "Requesting: $fullUrl\n";
-            $res = $this->httpClient->get(
-                $fullUrl,
-                [
-                    'headers' => [
-                        'uuid' => $this->username,
-                        'securityhash' => $securityHash
-                    ]
-                ]
-            );
+            
+            $headers = [
+                'uuid' => $this->username,
+                'securityhash' => $securityHash
+            ];
+            
+            if ($postData) {
+                $stream = \GuzzleHttp\Stream\Stream::factory($postData);
+                $res = $this->httpClient->post(
+                    $fullUrl,
+                    ['headers' => $headers, 'body' => $stream]
+                );
+            } else {
+                $res = $this->httpClient->get(
+                    $fullUrl,
+                    ['headers' => $headers]
+                );
+            }
             if ($res->getStatusCode() == 200) {
                 return $res->getBody();
             }
@@ -157,5 +171,53 @@ class Client
              $xml = (string)$e->getResponse()->getBody();
              $this->processErrorResponse($xml);
         }
+    }
+    
+    public function updateClientInfo(Resource $resource, $agb = null)
+    {
+        $resources = array();
+        $xml = $this->buildUpdateClientInfoXml($resource, $agb);
+    
+        $body = $this->sendRequest('/updateclientinfo', $xml);
+        return $body;
+    }
+    
+    private function buildUpdateClientInfoXml(Resource $resource, $agb = null)
+    {
+        $clientNode = new SimpleXMLElement('<client />');
+        $clientNode->addChild('bsn', $resource->getPropertyValue('bsn'));
+        $clientNode->addChild('birthdate', $resource->getPropertyValue('birthdate'));
+        $clientNode->addChild('zisnummer', $resource->getPropertyValue('zisnummer'));
+        $clientNode->addChild('firstname', $resource->getPropertyValue('firstname'));
+        $clientNode->addChild('lastname', $resource->getPropertyValue('lastname'));
+        $eocsNode = $clientNode->addChild('eocs');
+        $eocNode = $eocsNode->addChild('eoc');
+        $eocNode->addChild('reference', $resource->getPropertyValue('reference'));
+        $eocNode->addChild('gravida', $resource->getPropertyValue('gravida'));
+        $eocNode->addChild('para', $resource->getPropertyValue('para'));
+        $eocNode->addChild('starttimestamp', $resource->getPropertyValue('starttimestamp'));
+        $eocNode->addChild('edd', $resource->getPropertyValue('edd'));
+        
+        foreach ($resource->getShares() as $share) {
+            $shareNode = $eocNode->addChild('teammember');
+            $shareNode->addChild('name', $share->getName());
+            if ($share->getIdentifierType()!='agb') {
+                throw new RuntimeException('Identifier types other than AGB not supported in v1 api');
+            }
+            $shareNode->addChild('agb', $share->getIdentifier());
+            $shareNode->addChild('permission', $share->getPermission());
+        }
+        $providersNode = $eocsNode->addChild('providers');
+        $providerNode = $providersNode->addChild('provider');
+        $providerNode->addChild('uuid', $this->username);
+        if ($agb) {
+            $providerNode->addChild('agb', $agb);
+        }
+        
+        //echo $clientNode->asXML();
+        
+        $dom = dom_import_simplexml($clientNode)->ownerDocument;
+        $dom->formatOutput = true;
+        return $dom->saveXML();
     }
 }
