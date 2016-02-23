@@ -4,7 +4,8 @@ use Hub\Client\Exception\NotFoundException;
 
 require_once __DIR__ . '/../common.php';
 
-$client = new \Hub\Client\V1\Client($username, $password, $url);
+$hubClient = new \Hub\Client\V1\HubV1Client($username, $password, $url);
+$providerClient = new \Hub\Client\V1\ProviderV1Client($username, $password);
 
 if (count($argv)!=2) {
     exit("Expecting 1 parameter: bsn\n");
@@ -12,13 +13,13 @@ if (count($argv)!=2) {
 $bsn = $argv[1];
 
 try {
-    $resources = $client->getDossierInfo($bsn);
+    $resources = $hubClient->getDossierInfo($bsn);
 } catch (NotFoundException $e) {
     exit("No results found...\n");
 }
+print_r($resources);
 
 foreach ($resources as $resource) {
-    $data = $client->getResourceData($resource);
+    $data = $providerClient->getResourceData($resource);
     echo $data;
 }
-print_r($resources);
