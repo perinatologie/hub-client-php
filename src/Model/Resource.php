@@ -61,4 +61,30 @@ class Resource
     {
         return $this->shares;
     }
+    
+    private $sourceUrl;
+    
+    public function getSourceUrl()
+    {
+        return $this->sourceUrl;
+    }
+    
+    public function setSourceUrl($sourceUrl)
+    {
+        $this->sourceUrl = $sourceUrl;
+        return $this;
+    }
+    
+    private $sourceJwt;
+    
+    public function getSourceJwt()
+    {
+        return $this->sourceJwt;
+    }
+    
+    public function setSourceJwt($sourceJwt)
+    {
+        $this->sourceJwt = $sourceJwt;
+        return $this;
+    }
 }
