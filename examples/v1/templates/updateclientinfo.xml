@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <client>
-    <bsn>909090908</bsn>
+    <bsn>909090907</bsn>
     <birthdate>04121982</birthdate>
     <zisnummer>20048013028</zisnummer>
-    <firstname>Sample Firstname2</firstname>
-    <lastname>Sample Lastname2</lastname>
+    <firstname>SampleX Firstname2</firstname>
+    <lastname>SampleX Lastname2</lastname>
     <eocs>
         <eoc>
             <reference>G6 2016</reference>

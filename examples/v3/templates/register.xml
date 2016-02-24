@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource>
+    <property name="client_bsn">909090907</property>
+    <property name="client_birthdate">19820102</property>
+    <property name="client_zisnummer">20048013028</property>
+    <property name="client_displayname">Sample DisplayName</property>
+    <property name="reference">G6 2016</property>
+    <property name="gravida">6</property>
+    <property name="para">5</property>
+    <property name="start_at">26012015</property>
+    <property name="edd">20150908</property>
+    <share>
+        <name>Demo Hospital</name>
+        <identifier type="agb">08009876</identifier>
+        <permission>full</permission>
+    </share>
+    <share>
+        <name>Demo Practice</name>
+        <identifier type="agb">08000000</identifier>
+        <permission>full</permission>
+    </share>
+</resource>

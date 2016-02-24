@@ -34,6 +34,9 @@ class Resource
     
     public function getProperty($name)
     {
+        if (!isset($this->properties[$name])) {
+            return null;
+        }
         return $this->properties[$name];
     }
     
@@ -49,6 +52,11 @@ class Resource
         $property = new Property($name, $value);
         $this->addProperty($property);
         return $this;
+    }
+    
+    public function getProperties()
+    {
+        return $this->properties;
     }
     
     public function addShare(Share $share)
@@ -74,6 +82,20 @@ class Resource
         $this->sourceUrl = $sourceUrl;
         return $this;
     }
+    
+    private $sourceApi;
+    
+    public function getSourceApi()
+    {
+        return $this->sourceApi;
+    }
+    
+    public function setSourceApi($sourceApi)
+    {
+        $this->sourceApi = $sourceApi;
+        return $this;
+    }
+    
     
     private $sourceJwt;
     

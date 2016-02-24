@@ -34,6 +34,7 @@ class HubV1Client
             //echo "HASHING: $hashSource\n";
             
             $securityHash = sha1($hashSource);
+            
             //echo "Requesting: $fullUrl\n";
             
             $headers = [
@@ -56,7 +57,6 @@ class HubV1Client
             if ($res->getStatusCode() == 200) {
                 return $res->getBody();
             }
-            
         } catch (\GuzzleHttp\Exception\RequestException $e) {
              ErrorResponseHandler::handle($e->getResponse());
         }
@@ -86,7 +86,7 @@ class HubV1Client
                     $resource->addPropertyValue('para', $eocNode->para);
                     $resource->addPropertyValue('provider_reference', $providerNode->dbname);
                     $resource->addPropertyValue('provider_apiurl', $providerNode->apiurl);
-                    
+                    $resource->setSourceApi('v1');
                     $resources[] = $resource;
                 }
             }
@@ -101,16 +101,16 @@ class HubV1Client
         return $this->parseDossiersXmlToResources((string)$body);
     }
     
-    public function updateClientInfo(Resource $resource, $agb = null)
+    public function updateClientInfo(Resource $resource, $providerAgb = null)
     {
         $resources = array();
-        $xml = $this->buildUpdateClientInfoXml($resource, $agb);
+        $xml = $this->buildUpdateClientInfoXml($resource, $providerAgb);
     
         $body = $this->sendRequest('/updateclientinfo', $xml);
         return $body;
     }
     
-    private function buildUpdateClientInfoXml(Resource $resource, $agb = null)
+    private function buildUpdateClientInfoXml(Resource $resource, $providerAgb = null)
     {
         $clientNode = new SimpleXMLElement('<client />');
         $clientNode->addChild('bsn', $resource->getPropertyValue('bsn'));
@@ -138,8 +138,8 @@ class HubV1Client
         $providersNode = $eocsNode->addChild('providers');
         $providerNode = $providersNode->addChild('provider');
         $providerNode->addChild('uuid', $this->username);
-        if ($agb) {
-            $providerNode->addChild('agb', $agb);
+        if ($providerAgb) {
+            $providerNode->addChild('agb', $providerAgb);
         }
         
         //echo $clientNode->asXML();

@@ -4,9 +4,8 @@ use Hub\Client\Exception\NotFoundException;
 
 require_once __DIR__ . '/../common.php';
 
-$hubClient = new \Hub\Client\V3\HubV3Client($username, $password, $url);
-$providerClient = new \Hub\Client\V1\ProviderV1Client($username, $password);
-//$providerClient = new \Hub\Client\V3\ProviderV3Client();
+$hubClient = new \Hub\Client\V3\HubV3Client($usernameV3, $passwordV3, $url);
+$providerClient = new \Hub\Client\Provider\ProviderClient($usernameV1, $passwordV1);
 
 $filters = array();
 if (count($argv)>1) {
@@ -32,8 +31,7 @@ try {
     exit("\nNo results found...\n");
 }
 print_r($resources);
-
-//print_r($resources); exit();
+//exit();
 
 foreach ($resources as $resource) {
     $data = $providerClient->getResourceData($resource);

@@ -60,7 +60,6 @@ class HubV3Client
             if ($res->getStatusCode() == 200) {
                 return (string)$res->getBody();
             }
-            
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             ErrorResponseHandler::handle($e->getResponse());
         }
@@ -71,7 +70,7 @@ class HubV3Client
     {
         $rootNode = @simplexml_load_string($xml);
         if (!$rootNode) {
-            //echo $xml;
+            echo $xml;
             throw new RuntimeException("Failed to parse response as XML...\n");
         }
         $resources = array();
@@ -81,11 +80,18 @@ class HubV3Client
             foreach ($resourceNode->property as $propertyNode) {
                 $resource->addPropertyValue($propertyNode['name'], (string)$propertyNode);
             }
-            if (!$resourceNode->source) {
+            $sourceNode = $resourceNode->source;
+            if (!$sourceNode) {
                 throw new RuntimeException("Resource node does not contain source element");
             }
-            $resource->setSourceUrl((string)$resourceNode->source->url);
-            $resource->setSourceJwt((string)$resourceNode->source->jwt);
+            $resource->setSourceUrl((string)$sourceNode->url);
+            $resource->setSourceApi((string)$sourceNode->api);
+            if (!$resource->getSourceApi()) {
+                throw new RuntimeException("No source api returned");
+            }
+            if ($sourceNode->jwt) {
+                $resource->setSourceJwt((string)$sourceNode->jwt);
+            }
             
             $resources[] = $resource;
         }
@@ -115,46 +121,34 @@ class HubV3Client
     public function register(Resource $resource, $agb = null)
     {
         $resources = array();
-        $xml = $this->buildUpdateClientInfoXml($resource, $agb);
+        $xml = $this->buildRegisterXml($resource, $agb);
+        //exit($xml);
     
         $body = $this->sendRequest('/register', $xml);
-        return $body;
+        
+        $rootNode = @simplexml_load_string($body);
+        if (!$rootNode || ($rootNode->getName() != 'status') || ((string)$rootNode != 'OK')) {
+            throw new RuntimeException("Did not receive OK status: " . $body);
+        }
+        return true;
     }
     
     private function buildRegisterXml(Resource $resource, $agb = null)
     {
-        $clientNode = new SimpleXMLElement('<client />');
-        $clientNode->addChild('bsn', $resource->getPropertyValue('bsn'));
-        $clientNode->addChild('birthdate', $resource->getPropertyValue('birthdate'));
-        $clientNode->addChild('zisnummer', $resource->getPropertyValue('zisnummer'));
-        $clientNode->addChild('firstname', $resource->getPropertyValue('firstname'));
-        $clientNode->addChild('lastname', $resource->getPropertyValue('lastname'));
-        $eocsNode = $clientNode->addChild('eocs');
-        $eocNode = $eocsNode->addChild('eoc');
-        $eocNode->addChild('reference', $resource->getPropertyValue('reference'));
-        $eocNode->addChild('gravida', $resource->getPropertyValue('gravida'));
-        $eocNode->addChild('para', $resource->getPropertyValue('para'));
-        $eocNode->addChild('starttimestamp', $resource->getPropertyValue('starttimestamp'));
-        $eocNode->addChild('edd', $resource->getPropertyValue('edd'));
+        $resourceNode = new SimpleXMLElement('<resource />');
+        foreach ($resource->getProperties() as $property) {
+            $resourceNode->addChild('property', $property->getValue())->addAttribute('name', $property->getName());
+        }
         
         foreach ($resource->getShares() as $share) {
-            $shareNode = $eocNode->addChild('teammember');
+            $shareNode = $resourceNode->addChild('share');
             $shareNode->addChild('name', $share->getName());
-            if ($share->getIdentifierType()!='agb') {
-                throw new RuntimeException('Identifier types other than AGB not supported in v1 api');
-            }
-            $shareNode->addChild('agb', $share->getIdentifier());
+            $shareNode->addChild('identifier', $share->getIdentifier())->addAttribute('type', $share->getIdentifierType());
             $shareNode->addChild('permission', $share->getPermission());
-        }
-        $providersNode = $eocsNode->addChild('providers');
-        $providerNode = $providersNode->addChild('provider');
-        $providerNode->addChild('uuid', $this->username);
-        if ($agb) {
-            $providerNode->addChild('agb', $agb);
         }
         
         //echo $clientNode->asXML();
-        $dom = dom_import_simplexml($clientNode)->ownerDocument;
+        $dom = dom_import_simplexml($resourceNode)->ownerDocument;
         $dom->formatOutput = true;
         return $dom->saveXML();
     }

@@ -4,6 +4,7 @@ namespace Hub\Client\Common;
 
 use Hub\Client\Exception\BadRequestException;
 use Hub\Client\Exception\NotFoundException;
+use Hub\Client\Exception\NotAuthorizedException;
 use GuzzleHttp\Message\Response;
 use RuntimeException;
 
