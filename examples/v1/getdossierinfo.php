@@ -19,7 +19,7 @@ try {
 }
 
 foreach ($resources as $resource) {
-    $data = $providerClient->getResourceData($resource);
+    $data = $providerClient->getResourceData($resource, $resource->getSource());
     echo $data;
 }
 exit();

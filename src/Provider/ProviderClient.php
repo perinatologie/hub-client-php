@@ -4,6 +4,7 @@ namespace Hub\Client\Provider;
 
 use Hub\Client\Model\Resource;
 use Hub\Client\Model\Property;
+use Hub\Client\Model\Source;
 use Hub\Client\Common\ErrorResponseHandler;
 use GuzzleHttp\Client as GuzzleClient;
 use RuntimeException;
@@ -23,23 +24,23 @@ class ProviderClient
     }
 
 
-    public function getResourceData(Resource $resource)
+    public function getResourceData(Resource $resource, Source $source)
     {
-        switch ($resource->getSourceApi()) {
+        switch ($source->getApi()) {
             case 'v1':
-                return $this->getResourceDataV1($resource);
+                return $this->getResourceDataV1($resource, $source);
                 break;
             case 'v3':
-                return $this->getResourceDataV3($resource);
+                return $this->getResourceDataV3($source);
             default:
-                throw new RuntimeException("Unsupported source API: " . $resource->getSourceApi());
+                throw new RuntimeException("Unsupported source API: " . $source->getApi());
         }
     }
     
-    private function getResourceDataV1(Resource $resource)
+    private function getResourceDataV1(Resource $resource, Source $source)
     {
-        if ($resource->getSourceUrl()) {
-            $url = $resource->getSourceUrl();
+        if ($source->getUrl()) {
+            $url = $source->getUrl();
         } else {
             $providerApiUrl = $resource->getPropertyValue('provider_apiurl');
             if (!$providerApiUrl) {
@@ -49,7 +50,7 @@ class ProviderClient
             $ref = $resource->getPropertyValue('reference');
             
             switch ($resource->getType()) {
-                case 'hub/dossier':
+                case 'perinatologie/dossier':
                     $url = $providerApiUrl . '/' . $bsn . '/' . rawurlencode($ref);
                     break;
                 default:
@@ -62,7 +63,7 @@ class ProviderClient
             $hashSource = $url . $this->password;
             
             $headers = array();
-            
+            //echo "REQUESTING PROVIDER URL: " . $url . "\n";
             if ($this->username || $this->password) {
                 // stripping http(s) because of load-balancer. Hub sees http only
                 $securityHash = sha1(str_replace('https', 'http', $hashSource));
@@ -85,15 +86,18 @@ class ProviderClient
         }
     }
 
-    private function getResourceDataV3(Resource $resource)
+    private function getResourceDataV3(Source $source)
     {
-        $url = $resource->getSourceUrl();
-        $jwt = $resource->getSourceJwt();
+        $url = $source->getUrl();
+        $jwt = $source->getJwt();
         if (!$url) {
-            throw new RuntimeException("No provider url to get resource data");
+            throw new RuntimeException("No source URL to get resource data");
         }
-        //echo "REQUESTING: $url\n";
+        if (!$jwt) {
+            throw new RuntimeException("No source JWT to get resource data");
+        }
         $url .= "?jwt=". $jwt;
+        //echo "REQUESTING: $url\n";
         
         try {
             $res = $this->httpClient->get(
@@ -110,5 +114,4 @@ class ProviderClient
             ErrorResponseHandler::handle($e->getResponse());
         }
     }
-    
 }

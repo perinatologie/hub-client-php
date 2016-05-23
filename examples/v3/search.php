@@ -30,10 +30,19 @@ try {
 } catch (NotFoundException $e) {
     exit("\nNo results found...\n");
 }
-print_r($resources);
+
+foreach ($resources as $resource) {
+    echo "Resource [" . $resource->getType() . "]\n";
+    foreach ($resource->getProperties() as $property) {
+        echo "   " . $property->getName() . '=' . $property->getValue() . "\n";
+    } 
+}
+//print_r($resources);
 //exit();
 
+/*
 foreach ($resources as $resource) {
     $data = $providerClient->getResourceData($resource);
     echo $data;
 }
+*/

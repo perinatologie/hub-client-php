@@ -3,6 +3,7 @@
 namespace Hub\Client\V1;
 
 use Hub\Client\Model\Resource;
+use Hub\Client\Model\Source;
 use Hub\Client\Model\Property;
 use Hub\Client\Common\ErrorResponseHandler;
 use GuzzleHttp\Client as GuzzleClient;
@@ -66,7 +67,7 @@ class HubV1Client
     {
         $rootNode = @simplexml_load_string($xml);
         if (!$rootNode) {
-            //echo $xml;
+            echo $xml;
             throw new RuntimeException("Failed to parse response as XML...\n");
         }
         $resources = array();
@@ -76,7 +77,7 @@ class HubV1Client
                 $providerNode = $dossierNode->provider;
                 foreach ($dossierNode->client->eocs->eoc as $eocNode) {
                     $resource = new Resource();
-                    $resource->setType('hub/dossier');
+                    $resource->setType('perinatologie/dossier');
                     $resource->addPropertyValue('reference', $eocNode->reference);
                     $resource->addPropertyValue('client_bsn', $clientNode->bsn);
                     $resource->addPropertyValue('client_birthdate', $clientNode->birthdate);
@@ -86,7 +87,9 @@ class HubV1Client
                     $resource->addPropertyValue('para', $eocNode->para);
                     $resource->addPropertyValue('provider_reference', $providerNode->dbname);
                     $resource->addPropertyValue('provider_apiurl', $providerNode->apiurl);
-                    $resource->setSourceApi('v1');
+                    $source = new Source();
+                    $source->setApi('v1');
+                    $resource->setSource($source);
                     $resources[] = $resource;
                 }
             }

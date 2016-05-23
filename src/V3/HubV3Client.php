@@ -4,6 +4,7 @@ namespace Hub\Client\V3;
 
 use Hub\Client\Model\Resource;
 use Hub\Client\Model\Property;
+use Hub\Client\Model\Source;
 use Hub\Client\Common\ErrorResponseHandler;
 use GuzzleHttp\Client as GuzzleClient;
 use RuntimeException;
@@ -31,7 +32,6 @@ class HubV3Client
             $fullUrl = $this->url . '/v3' . $uri;
             
             $headers = array();
-            //echo "Requesting: " . $fullUrl;
             if ($postData) {
                 $stream = \GuzzleHttp\Stream\Stream::factory($postData);
                 $res = $this->httpClient->post(
@@ -66,24 +66,28 @@ class HubV3Client
     }
 
 
-    private function parseResourcesXmlToResources($xml)
+    private function parseXml($xml)
     {
-        $rootNode = @simplexml_load_string($xml);
-        if (!$rootNode) {
-            echo $xml;
+        $node = @simplexml_load_string($xml);
+        if (!$node) {
+            //exit($xml);
             throw new RuntimeException("Failed to parse response as XML...\n");
         }
+        return $node;
+    }
+    
+    private function parseResourcesXmlToResources($rootNode)
+    {
         $resources = array();
         foreach ($rootNode->resource as $resourceNode) {
-            $resource = new Resource();
-            $resource->setType('perinatologie/dossier');
-            foreach ($resourceNode->property as $propertyNode) {
-                $resource->addPropertyValue($propertyNode['name'], (string)$propertyNode);
-            }
+            $resource = $this->parseResourceXmlToResource($resourceNode);
+            
+            /*
             $sourceNode = $resourceNode->source;
             if (!$sourceNode) {
                 throw new RuntimeException("Resource node does not contain source element");
             }
+            
             $resource->setSourceUrl((string)$sourceNode->url);
             $resource->setSourceApi((string)$sourceNode->api);
             if (!$resource->getSourceApi()) {
@@ -92,10 +96,32 @@ class HubV3Client
             if ($sourceNode->jwt) {
                 $resource->setSourceJwt((string)$sourceNode->jwt);
             }
+            */
             
             $resources[] = $resource;
         }
         return $resources;
+    }
+    
+    private function parseResourceXmlToResource($resourceNode)
+    {
+        $resource = new Resource();
+        $resource->setType((string)$resourceNode['type']);
+        foreach ($resourceNode->property as $propertyNode) {
+            $resource->addPropertyValue($propertyNode['name'], (string)$propertyNode);
+        }
+        return $resource;
+    }
+    
+    private function parseSource($node)
+    {
+        $source = new Source();
+        $source->setUrl((string)$node->url);
+        $source->setApi((string)$node->api);
+        if ($node->jwt) {
+            $source->setJwt((string)$node->jwt);
+        }
+        return $source;
     }
 
     public function findResources($filters = array())
@@ -115,7 +141,29 @@ class HubV3Client
         $body = $this->sendRequest($uri, null);
         //echo($body);
         
-        return $this->parseResourcesXmlToResources((string)$body);
+        $node = $this->parseXml((string)$body);
+        return $this->parseResourcesXmlToResources($node);
+    }
+    
+    public function getResource($key)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key;
+        $body = $this->sendRequest($uri, null);
+        
+        $node = $this->parseXml((string)$body);
+        return $this->parseResourceXmlToResource($node);
+    }
+    
+
+    public function getSource($key)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key . '/source';
+        $body = $this->sendRequest($uri, null);
+        
+        $node = $this->parseXml((string)$body);
+        return $this->parseSource($node);
     }
     
     public function register(Resource $resource, $agb = null)
