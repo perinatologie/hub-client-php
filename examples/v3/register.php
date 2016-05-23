@@ -12,6 +12,6 @@ $agb = '08000000';
 
 print_r($resource);
 
-$client->register($resource, $agb);
+$key = $client->register($resource, $agb);
 
-exit("DONE\n");
+exit("Registered key: $key\n");

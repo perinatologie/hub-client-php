@@ -178,7 +178,7 @@ class HubV3Client
         if (!$rootNode || ($rootNode->getName() != 'status') || ((string)$rootNode != 'OK')) {
             throw new RuntimeException("Did not receive OK status: " . $body);
         }
-        return true;
+        return (string)$rootNode['key'];
     }
     
     private function buildRegisterXml(Resource $resource, $agb = null)
