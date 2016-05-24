@@ -27,6 +27,9 @@ class ErrorResponseHandler
                     case 404:
                         throw new NotFoundException((string)$rootNode->code, (string)$rootNode->message);
                         break;
+                    case 403:
+                        throw new NotAuthorizedException((string)$rootNode->code, (string)$rootNode->message);
+                        break;
                     default:
                         throw new RuntimeException(
                             "Unsupported response status code returned: " .

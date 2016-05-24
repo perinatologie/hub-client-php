@@ -9,6 +9,7 @@ $providerClient = new \Hub\Client\Provider\ProviderClient($usernameV1, $password
 
 if (count($argv)!=2) {
     echo "Please pass the resource key as the first argument\n";
+    exit(-1);
 }
 $key=$argv[1];
 echo "Fetching resource by key $key\n";
@@ -18,6 +19,16 @@ echo "Resource: $key\n";
 foreach ($resource->getProperties() as $property) {
     echo "   " . $property->getName() . '=' . $property->getValue() . "\n";
 }
+
+$shares = $hubClient->getShares($key);
+
+echo "Shares: " . count($shares) ."\n";
+foreach ($shares as $share) {
+    echo "  @" . $share->getName() . " <" . $share->getDisplayName() . "> [" . $share->getPermission() . "]\n";
+}
+
+
+//exit();
 
 $source = $hubClient->getSource($key);
 

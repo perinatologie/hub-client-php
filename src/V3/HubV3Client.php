@@ -5,6 +5,7 @@ namespace Hub\Client\V3;
 use Hub\Client\Model\Resource;
 use Hub\Client\Model\Property;
 use Hub\Client\Model\Source;
+use Hub\Client\Model\Share;
 use Hub\Client\Common\ErrorResponseHandler;
 use GuzzleHttp\Client as GuzzleClient;
 use RuntimeException;
@@ -123,6 +124,19 @@ class HubV3Client
         }
         return $source;
     }
+    
+    private function parseShares($node)
+    {
+        $shares = [];
+        foreach ($node as $shareNode) {
+            $share = new Share();
+            $share->setName((string)$shareNode->granteeName);
+            $share->setDisplayName((string)$shareNode->granteeDisplayName);
+            $share->setPermission((string)$shareNode->permission);
+            $shares[] = $share;
+        }
+        return $shares;
+    }
 
     public function findResources($filters = array())
     {
@@ -155,7 +169,6 @@ class HubV3Client
         return $this->parseResourceXmlToResource($node);
     }
     
-
     public function getSource($key)
     {
         $resources = array();
@@ -164,6 +177,38 @@ class HubV3Client
         
         $node = $this->parseXml((string)$body);
         return $this->parseSource($node);
+    }
+    
+    public function getShares($key)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key . '/shares';
+        $body = $this->sendRequest($uri, null);
+        
+        $node = $this->parseXml((string)$body);
+        return $this->parseShares($node);
+    }
+
+    public function addShare($key, $grantee, $permission)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key . '/shares/add/' . $grantee . '/' . $permission;
+        $body = $this->sendRequest($uri, null);
+        
+        $node = $this->parseXml((string)$body);
+        // TODO: Validate status=OK?
+        return true;
+    }
+    
+    public function removeShare($key, $grantee)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key . '/shares/remove/' . $grantee;
+        $body = $this->sendRequest($uri, null);
+        
+        $node = $this->parseXml((string)$body);
+        // TODO: Validate status=OK?
+        return true;
     }
     
     public function register(Resource $resource, $agb = null)

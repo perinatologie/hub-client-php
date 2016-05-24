@@ -18,6 +18,19 @@ class Share
         return $this;
     }
     
+    private $displayName;
+    
+    public function getDisplayName()
+    {
+        return $this->displayName;
+    }
+    
+    public function setDisplayName($displayName)
+    {
+        $this->displayName = $displayName;
+        return $this;
+    }
+    
     private $identifier;
     
     public function getIdentifier()
