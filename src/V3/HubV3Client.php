@@ -169,6 +169,15 @@ class HubV3Client
         return $this->parseResourceXmlToResource($node);
     }
     
+    public function getPicture($key)
+    {
+        $resources = array();
+        $uri = '/resources/' . $key . '/picture';
+        $body = $this->sendRequest($uri, null);
+        
+        return $body;
+    }
+    
     public function getSource($key)
     {
         $resources = array();
