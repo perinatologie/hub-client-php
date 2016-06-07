@@ -7,6 +7,7 @@ use Hub\Client\Model\Property;
 use Hub\Client\Model\Source;
 use Hub\Client\Model\Share;
 use Hub\Client\Common\ErrorResponseHandler;
+use Hub\Client\Exception\NoResponseException;
 use GuzzleHttp\Client as GuzzleClient;
 use RuntimeException;
 use SimpleXMLElement;
@@ -62,6 +63,9 @@ class HubV3Client
                 return (string)$res->getBody();
             }
         } catch (\GuzzleHttp\Exception\RequestException $e) {
+            if (!$e->getResponse()) {
+                throw new NoResponseException('NO_RESPONSE', 'No response / connection error requesting ' . $fullUrl);
+            }
             ErrorResponseHandler::handle($e->getResponse());
         }
     }
