@@ -237,7 +237,7 @@ class HubV3Client
     
     private function buildRegisterXml(Resource $resource, $agb = null)
     {
-        $resourceNode = new SimpleXMLElement('<resource />');
+        $resourceNode = new SimpleXMLElement('<resource type="' .  $resource->getType() . '" />');
         foreach ($resource->getProperties() as $property) {
             $resourceNode->addChild('property', $property->getValue())->addAttribute('name', $property->getName());
         }
