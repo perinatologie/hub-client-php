@@ -32,7 +32,11 @@ class HubV3Client
     {
         try {
             $fullUrl = $this->url . '/v3' . $uri;
-            
+            // more info: https://curl.haxx.se/docs/caextract.html
+            $verify = __DIR__ . '/../../cacert.pem';
+            if (!file_exists($verify)) {
+                throw new RuntimeException('cacert.pem not found: ' . $verify);
+            }
             $headers = array();
             if ($postData) {
                 $stream = \GuzzleHttp\Stream\Stream::factory($postData);
@@ -44,7 +48,8 @@ class HubV3Client
                         'auth' => [
                             $this->username,
                             $this->password
-                        ]
+                        ],
+                        'verify' => $verify
                     ]
                 );
             } else {
@@ -55,7 +60,8 @@ class HubV3Client
                         'auth' => [
                             $this->username,
                             $this->password
-                        ]
+                        ],
+                        'verify' => $verify
                     ]
                 );
             }
