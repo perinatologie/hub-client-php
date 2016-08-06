@@ -21,6 +21,12 @@ class ProviderClient
         $this->username = $username;
         $this->password = $password;
         $this->httpClient = new GuzzleClient();
+        
+        
+        $this->verify = __DIR__ . '/../../cacert.pem';
+        if (!file_exists($this->verify)) {
+            throw new RuntimeException('cacert.pem not found: ' . $this->verify);
+        }
     }
 
 
@@ -75,7 +81,10 @@ class ProviderClient
             //echo "REQUESTING: " . $fullUrl . "\n";
             $res = $this->httpClient->get(
                 $url,
-                [ 'headers' => $headers ]
+                [
+                    'headers' => $headers,
+                    'verify' => $this->verify
+                ]
             );
             if ($res->getStatusCode() == 200) {
                 $res = (string)$res->getBody();
@@ -103,7 +112,8 @@ class ProviderClient
             $res = $this->httpClient->get(
                 $url,
                 [
-                    'headers' => []
+                    'headers' => [],
+                    'verify' => $this->verify
                 ]
             );
             if ($res->getStatusCode() == 200) {
