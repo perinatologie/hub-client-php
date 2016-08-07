@@ -8,10 +8,8 @@ $filename = __DIR__ . '/templates/register.xml';
 
 $resource = loadRegisterXml($filename);
 
-$agb = '08000000';
-
 print_r($resource);
 
-$key = $client->register($resource, $agb);
+$key = $client->register($resource);
 
 exit("Registered key: $key\n");

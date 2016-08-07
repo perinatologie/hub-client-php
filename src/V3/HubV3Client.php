@@ -230,10 +230,10 @@ class HubV3Client
         return true;
     }
     
-    public function register(Resource $resource, $agb = null)
+    public function register(Resource $resource)
     {
         $resources = array();
-        $xml = $this->buildRegisterXml($resource, $agb);
+        $xml = $this->buildRegisterXml($resource);
         //exit($xml);
     
         $body = $this->sendRequest('/register', $xml);
@@ -245,7 +245,7 @@ class HubV3Client
         return (string)$rootNode['key'];
     }
     
-    private function buildRegisterXml(Resource $resource, $agb = null)
+    private function buildRegisterXml(Resource $resource)
     {
         $resourceNode = new SimpleXMLElement('<resource type="' .  $resource->getType() . '" />');
         foreach ($resource->getProperties() as $property) {
