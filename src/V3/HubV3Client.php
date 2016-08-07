@@ -19,12 +19,16 @@ class HubV3Client
     private $url;
     private $httpClient;
     
-    public function __construct($username, $password, $url)
+    public function __construct($username, $password, $url, $headers = [])
     {
         $this->username = $username;
         $this->password = $password;
         $this->url = rtrim($url, '/');
-        $this->httpClient = new GuzzleClient();
+        $this->httpClient = new GuzzleClient(
+            [
+                'headers' => $headers
+            ]
+        );
     }
     
 
