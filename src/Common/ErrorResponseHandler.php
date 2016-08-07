@@ -5,12 +5,11 @@ namespace Hub\Client\Common;
 use Hub\Client\Exception\BadRequestException;
 use Hub\Client\Exception\NotFoundException;
 use Hub\Client\Exception\NotAuthorizedException;
-use GuzzleHttp\Psr7\Response;
 use RuntimeException;
 
 class ErrorResponseHandler
 {
-    public static function handle(Response $response)
+    public static function handle($response)
     {
         if ($response->getStatusCode() == 401) {
             throw new NotAuthorizedException('NOT_AUTHORIZED', 'Basic auth failed');
