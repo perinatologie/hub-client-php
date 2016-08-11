@@ -42,6 +42,9 @@ class Resource
     
     public function getPropertyValue($name)
     {
+        if (!$this->hasProperty($name)) {
+            return null;
+        }
         return $this->getProperty($name)->getValue();
     }
     
