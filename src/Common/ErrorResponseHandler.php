@@ -32,7 +32,9 @@ class ErrorResponseHandler
                     default:
                         throw new RuntimeException(
                             "Unsupported response status code returned: " .
-                            (string)$rootNode->status . ' / ' . (string)$rootNode->code
+                            (string)$rootNode->code . ': ' .
+                            (string)$rootNode->messsage .
+                            " (" . (string)$rootNode->details . ")"
                         );
                         break;
                 }
