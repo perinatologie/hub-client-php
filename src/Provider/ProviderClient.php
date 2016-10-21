@@ -30,14 +30,14 @@ class ProviderClient
     }
 
 
-    public function getResourceData(Resource $resource, Source $source)
+    public function getResourceData(Resource $resource, Source $source, $accept = null)
     {
         switch ($source->getApi()) {
             case 'v1':
                 return $this->getResourceDataV1($resource, $source);
                 break;
             case 'v3':
-                return $this->getResourceDataV3($source);
+                return $this->getResourceDataV3($source, $accept);
             default:
                 throw new RuntimeException("Unsupported source API: " . $source->getApi());
         }
@@ -95,7 +95,7 @@ class ProviderClient
         }
     }
 
-    private function getResourceDataV3(Source $source)
+    private function getResourceDataV3(Source $source, $accept = null)
     {
         $url = $source->getUrl();
         $jwt = $source->getJwt();
@@ -105,7 +105,12 @@ class ProviderClient
         if (!$jwt) {
             throw new RuntimeException("No source JWT to get resource data");
         }
-        $url .= "?jwt=". $jwt;
+        if ($jwt) {
+            $url .= "?jwt=". $jwt;
+        }
+        if ($accept) {
+            $accept .= '&accept=' . $accept;
+        }
         //echo "REQUESTING: $url\n";
         
         try {
