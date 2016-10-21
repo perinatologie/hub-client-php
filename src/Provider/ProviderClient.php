@@ -109,7 +109,7 @@ class ProviderClient
             $url .= "?jwt=". $jwt;
         }
         if ($accept) {
-            $accept .= '&accept=' . $accept;
+            $url .= '&accept=' . $accept;
         }
         //echo "REQUESTING: $url\n";
         
