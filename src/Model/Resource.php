@@ -73,6 +73,26 @@ class Resource
         return $this->shares;
     }
     
+        
+    public function presentProperty($name)
+    {
+        if (!$this->hasProperty($name)) {
+            return '-';
+        }
+        $value = $this->getPropertyValue($name);
+        switch ($name) {
+            case 'client_birthdate':
+            case 'hub_registered_at':
+            case 'start_at':
+                if (strlen($value)!=8) {
+                    return '?' . $value;
+                }
+                return substr($value, 6, 2) . '-' . substr($value, 4, 2) . '-' . substr($value, 0, 4);
+            default:
+                return $value;
+        }
+    }
+    
     /*
     
     private $sourceUrl;
