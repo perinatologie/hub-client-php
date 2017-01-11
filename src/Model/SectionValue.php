@@ -53,4 +53,25 @@ class SectionValue
         $this->repeat = $repeat;
         return $this;
     }
+    
+    protected function isStamp()
+    {
+        if (!is_numeric($this->value)) {
+            return false;
+        }
+        if (strpos(strtolower($this->label), 'datum')!== false) {
+            return true;
+        }
+        return false;
+    }
+    
+    public function presentValue()
+    {
+        $value = $this->getValue();
+        $value = nl2br($value);
+        if ($this->isStamp()) {
+            $value = date('d-m-Y', $value);
+        }
+        return $value;
+    }
 }
