@@ -28,6 +28,9 @@ Hub v1 and v3 use different authentication methods, therefor you can specify the
 
 Note, the v1 credentials are also used to access resources at providers for v1 security hashes.
 
+You can use a `.env` file, by copying the `.env.dist` to `.env` and updating it
+with your credentials.
+
 ### Run the examples
 
 ```sh

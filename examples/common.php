@@ -3,8 +3,16 @@
 use Hub\Client\Model\Resource;
 use Hub\Client\Model\Property;
 use Hub\Client\Model\Share;
+use Symfony\Component\Dotenv\Dotenv;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+$envFilename = '.env';
+if (file_exists($envFilename)) {
+    $dotenv = new Dotenv();
+    $dotenv->load($envFilename);
+}
+
 $usernameV1 = getenv('HUB_V1_USERNAME');
 $passwordV1 = getenv('HUB_V1_PASSWORD');
 $usernameV3 = getenv('HUB_V3_USERNAME');
@@ -34,7 +42,7 @@ function loadUpdateClientInfoXml($filename)
     foreach ($clientNode->eocs->eoc as $eocNode) {
         $resource = new Resource();
         $resource->setType('perinatologie/dossier');
-        
+
         // Client details
         $resource->addPropertyValue('bsn', $clientNode->bsn);
         $resource->addPropertyValue('birthdate', $clientNode->birthdate);
@@ -48,7 +56,7 @@ function loadUpdateClientInfoXml($filename)
         $resource->addPropertyValue('para', $eocNode->para);
         $resource->addPropertyValue('starttimestamp', $eocNode->starttimestamp);
         $resource->addPropertyValue('edd', $eocNode->edd);
-        
+
         foreach ($eocNode->teammember as $shareNode) {
             $share = new Share();
             $share->setName((string)$shareNode->name);

@@ -10,6 +10,9 @@
             "role": "Development"
         }
     ],
+    "require-dev": {
+        "symfony/dotenv": "3.3.x-dev"
+    },
     "require": {
         "guzzlehttp/guzzle": "^4.0|^5.0|^6.0",
         "guzzlehttp/streams": "~3.0"
