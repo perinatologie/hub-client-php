@@ -30,14 +30,18 @@ foreach ($shares as $share) {
 
 //exit();
 
-$source = $hubClient->getSource($key);
+$accept = null;
+$accept = 'hub/dossier';
+
+
+$source = $hubClient->getSource($key, $accept);
 
 echo "Source: " . $source->getUrl() . " [" . $source->getApi() . "]\n";
 if ($source->getJwt()) {
     echo "JWT: " . $source->getJwt() . "\n";
 }
 
-$data = $providerClient->getResourceData($resource, $source);
+$data = $providerClient->getResourceData($resource, $source, $accept);
 echo $data;
 
 //print_r($source);

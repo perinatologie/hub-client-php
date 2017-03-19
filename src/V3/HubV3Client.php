@@ -191,11 +191,14 @@ class HubV3Client
         
         return $body;
     }
-    
-    public function getSource($key)
+
+    public function getSource($key, $accept = null)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/source';
+        if ($accept) {
+          $uri .= '?accept=' . $accept;
+        }
         $body = $this->sendRequest($uri, null);
         
         $node = $this->parseXml((string)$body);
