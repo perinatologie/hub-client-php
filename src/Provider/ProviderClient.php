@@ -103,7 +103,7 @@ class ProviderClient
             throw new RuntimeException("No source URL to get resource data");
         }
         if (!$jwt) {
-            throw new RuntimeException("No source JWT to get resource data");
+            //throw new RuntimeException("No source JWT to get resource data");
         }
         if ($jwt) {
             $url .= "?jwt=". $jwt;
