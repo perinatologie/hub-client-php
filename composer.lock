@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee58b8d62b8de55843c3e0578ef7241b",
+    "content-hash": "3deef2f3b37c3440e02f1e57b74b73fe",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -288,20 +288,20 @@
     "packages-dev": [
         {
             "name": "symfony/dotenv",
-            "version": "dev-master",
+            "version": "v3.3.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dotenv.git",
-                "reference": "7a7c8d43c1af1f3d820aa40f922f4ef0c63d704a"
+                "reference": "ac86b6e484ae9224be290f3a0686858ba18d49d5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dotenv/zipball/7a7c8d43c1af1f3d820aa40f922f4ef0c63d704a",
-                "reference": "7a7c8d43c1af1f3d820aa40f922f4ef0c63d704a",
+                "url": "https://api.github.com/repos/symfony/dotenv/zipball/ac86b6e484ae9224be290f3a0686858ba18d49d5",
+                "reference": "ac86b6e484ae9224be290f3a0686858ba18d49d5",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5.9"
+                "php": "^5.5.9|>=7.0.8"
             },
             "require-dev": {
                 "symfony/process": "^3.2"
@@ -341,14 +341,12 @@
                 "env",
                 "environment"
             ],
-            "time": "2017-02-20 13:56:45"
+            "time": "2017-09-05T07:59:31+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "symfony/dotenv": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
