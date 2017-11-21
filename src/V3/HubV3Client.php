@@ -16,30 +16,44 @@ class HubV3Client
 {
     private $username;
     private $password;
-    private $url;
-    private $httpClient;
+    private $tlsCertVerification;
 
-    public function __construct($username, $password, $url, $headers = [])
-    {
+    protected $httpClient;
+    protected $url;
+
+    public function __construct(
+        $username,
+        $password,
+        $url,
+        $headers = [],
+        $tlsCertVerification = null
+    ) {
         $this->username = $username;
         $this->password = $password;
-        $this->url = rtrim($url, '/');
+        $this->url = rtrim($url, '/') . '/v3';
         $this->httpClient = new GuzzleClient(
             [
                 'headers' => $headers
             ]
         );
+        if (null === $tlsCertVerification) {
+            $this->tlsCertVerification = __DIR__ . '/../../cacert.pem';
+        } else {
+            $this->tlsCertVerification = $tlsCertVerification;
+        }
     }
 
-    private function sendRequest($uri, $postData = null)
+    /**
+     * @param string $uri
+     * @param string $postData
+     * @return string
+     * @throws \RuntimeException
+     * @throws \Hub\Client\Exception\NoResponseException
+     */
+    protected function sendRequest($uri, $postData = null)
     {
         try {
-            $fullUrl = $this->url . '/v3' . $uri;
-            // more info: https://curl.haxx.se/docs/caextract.html
-            $verify = __DIR__ . '/../../cacert.pem';
-            if (!file_exists($verify)) {
-                throw new RuntimeException('cacert.pem not found: ' . $verify);
-            }
+            $fullUrl = $this->url . $uri;
             $headers = array();
             if ($postData) {
                 $stream = \GuzzleHttp\Stream\Stream::factory($postData);
@@ -52,7 +66,7 @@ class HubV3Client
                             $this->username,
                             $this->password
                         ],
-                        'verify' => $verify
+                        'verify' => $this->getTlsCertificateVerification()
                     ]
                 );
             } else {
@@ -64,7 +78,7 @@ class HubV3Client
                             $this->username,
                             $this->password
                         ],
-                        'verify' => $verify
+                        'verify' => $this->getTlsCertificateVerification()
                     ]
                 );
             }
@@ -269,5 +283,29 @@ class HubV3Client
         $dom = dom_import_simplexml($resourceNode)->ownerDocument;
         $dom->formatOutput = true;
         return $dom->saveXML();
+    }
+
+    /*
+     * The purpose of this method is to maintain backaward compatability
+     * as regard to the use of a hardcoded certificate store which is checked
+     * for existence before every request is sent, whilst also allowing the
+     * value to be given in the constructor as a string or boolean (see the
+     * \GuzzleHttp\RequestOptions::VERIFY option and
+     * https://curl.haxx.se/docs/caextract.html for more info).
+     *
+     * @retun bool|string
+     *
+     * @throws RuntimeException
+     */
+    private function getTlsCertificateVerification()
+    {
+        if (is_string($this->tlsCertVerification)
+            && (!file_exists($this->tlsCertVerification) || !is_file($this->tlsCertVerification))
+        ) {
+            throw new RuntimeException(
+                "cacert.pem not found: {$this->tlsCertVerification}"
+            );
+        }
+        return $this->tlsCertVerification;
     }
 }
