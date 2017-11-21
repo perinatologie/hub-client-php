@@ -18,7 +18,7 @@ class HubV3Client
     private $password;
     private $url;
     private $httpClient;
-    
+
     public function __construct($username, $password, $url, $headers = [])
     {
         $this->username = $username;
@@ -30,7 +30,6 @@ class HubV3Client
             ]
         );
     }
-    
 
     private function sendRequest($uri, $postData = null)
     {
@@ -90,19 +89,19 @@ class HubV3Client
         }
         return $node;
     }
-    
+
     private function parseResourcesXmlToResources($rootNode)
     {
         $resources = array();
         foreach ($rootNode->resource as $resourceNode) {
             $resource = $this->parseResourceXmlToResource($resourceNode);
-            
+
             /*
             $sourceNode = $resourceNode->source;
             if (!$sourceNode) {
                 throw new RuntimeException("Resource node does not contain source element");
             }
-            
+
             $resource->setSourceUrl((string)$sourceNode->url);
             $resource->setSourceApi((string)$sourceNode->api);
             if (!$resource->getSourceApi()) {
@@ -112,12 +111,12 @@ class HubV3Client
                 $resource->setSourceJwt((string)$sourceNode->jwt);
             }
             */
-            
+
             $resources[] = $resource;
         }
         return $resources;
     }
-    
+
     private function parseResourceXmlToResource($resourceNode)
     {
         $resource = new Resource();
@@ -127,7 +126,7 @@ class HubV3Client
         }
         return $resource;
     }
-    
+
     private function parseSource($node)
     {
         $source = new Source();
@@ -138,7 +137,7 @@ class HubV3Client
         }
         return $source;
     }
-    
+
     private function parseShares($node)
     {
         $shares = [];
@@ -168,27 +167,27 @@ class HubV3Client
         }
         $body = $this->sendRequest($uri, null);
         //echo($body);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseResourcesXmlToResources($node);
     }
-    
+
     public function getResource($key)
     {
         $resources = array();
         $uri = '/resources/' . $key;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseResourceXmlToResource($node);
     }
-    
+
     public function getPicture($key)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/picture';
         $body = $this->sendRequest($uri, null);
-        
+
         return $body;
     }
 
@@ -200,17 +199,17 @@ class HubV3Client
           $uri .= '?accept=' . $accept;
         }
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseSource($node);
     }
-    
+
     public function getShares($key)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/shares';
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseShares($node);
     }
@@ -220,52 +219,52 @@ class HubV3Client
         $resources = array();
         $uri = '/resources/' . $key . '/shares/add/' . $grantee . '/' . $permission;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         // TODO: Validate status=OK?
         return true;
     }
-    
+
     public function removeShare($key, $grantee)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/shares/remove/' . $grantee;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         // TODO: Validate status=OK?
         return true;
     }
-    
+
     public function register(Resource $resource)
     {
         $resources = array();
         $xml = $this->buildRegisterXml($resource);
         //exit($xml);
-    
+
         $body = $this->sendRequest('/register', $xml);
-        
+
         $rootNode = @simplexml_load_string($body);
         if (!$rootNode || ($rootNode->getName() != 'status') || ((string)$rootNode != 'OK')) {
             throw new RuntimeException("Did not receive OK status: " . $body);
         }
         return (string)$rootNode['key'];
     }
-    
+
     private function buildRegisterXml(Resource $resource)
     {
         $resourceNode = new SimpleXMLElement('<resource type="' .  $resource->getType() . '" />');
         foreach ($resource->getProperties() as $property) {
             $resourceNode->addChild('property', $property->getValue())->addAttribute('name', $property->getName());
         }
-        
+
         foreach ($resource->getShares() as $share) {
             $shareNode = $resourceNode->addChild('share');
             $shareNode->addChild('name', $share->getName());
             $shareNode->addChild('identifier', $share->getIdentifier())->addAttribute('type', $share->getIdentifierType());
             $shareNode->addChild('permission', $share->getPermission());
         }
-        
+
         //echo $clientNode->asXML();
         $dom = dom_import_simplexml($resourceNode)->ownerDocument;
         $dom->formatOutput = true;
