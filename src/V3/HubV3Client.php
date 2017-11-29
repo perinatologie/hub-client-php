@@ -16,31 +16,44 @@ class HubV3Client
 {
     private $username;
     private $password;
-    private $url;
-    private $httpClient;
-    
-    public function __construct($username, $password, $url, $headers = [])
-    {
+    private $tlsCertVerification;
+
+    protected $httpClient;
+    protected $url;
+
+    public function __construct(
+        $username,
+        $password,
+        $url,
+        $headers = [],
+        $tlsCertVerification = null
+    ) {
         $this->username = $username;
         $this->password = $password;
-        $this->url = rtrim($url, '/');
+        $this->url = rtrim($url, '/') . '/v3';
         $this->httpClient = new GuzzleClient(
             [
                 'headers' => $headers
             ]
         );
+        if (null === $tlsCertVerification) {
+            $this->tlsCertVerification = __DIR__ . '/../../cacert.pem';
+        } else {
+            $this->tlsCertVerification = $tlsCertVerification;
+        }
     }
-    
 
-    private function sendRequest($uri, $postData = null)
+    /**
+     * @param string $uri
+     * @param string $postData
+     * @return string
+     * @throws \RuntimeException
+     * @throws \Hub\Client\Exception\NoResponseException
+     */
+    protected function sendRequest($uri, $postData = null)
     {
         try {
-            $fullUrl = $this->url . '/v3' . $uri;
-            // more info: https://curl.haxx.se/docs/caextract.html
-            $verify = __DIR__ . '/../../cacert.pem';
-            if (!file_exists($verify)) {
-                throw new RuntimeException('cacert.pem not found: ' . $verify);
-            }
+            $fullUrl = $this->url . $uri;
             $headers = array();
             if ($postData) {
                 $stream = \GuzzleHttp\Stream\Stream::factory($postData);
@@ -53,7 +66,7 @@ class HubV3Client
                             $this->username,
                             $this->password
                         ],
-                        'verify' => $verify
+                        'verify' => $this->getTlsCertificateVerification()
                     ]
                 );
             } else {
@@ -65,7 +78,7 @@ class HubV3Client
                             $this->username,
                             $this->password
                         ],
-                        'verify' => $verify
+                        'verify' => $this->getTlsCertificateVerification()
                     ]
                 );
             }
@@ -90,19 +103,19 @@ class HubV3Client
         }
         return $node;
     }
-    
+
     private function parseResourcesXmlToResources($rootNode)
     {
         $resources = array();
         foreach ($rootNode->resource as $resourceNode) {
             $resource = $this->parseResourceXmlToResource($resourceNode);
-            
+
             /*
             $sourceNode = $resourceNode->source;
             if (!$sourceNode) {
                 throw new RuntimeException("Resource node does not contain source element");
             }
-            
+
             $resource->setSourceUrl((string)$sourceNode->url);
             $resource->setSourceApi((string)$sourceNode->api);
             if (!$resource->getSourceApi()) {
@@ -112,12 +125,12 @@ class HubV3Client
                 $resource->setSourceJwt((string)$sourceNode->jwt);
             }
             */
-            
+
             $resources[] = $resource;
         }
         return $resources;
     }
-    
+
     private function parseResourceXmlToResource($resourceNode)
     {
         $resource = new Resource();
@@ -127,7 +140,7 @@ class HubV3Client
         }
         return $resource;
     }
-    
+
     private function parseSource($node)
     {
         $source = new Source();
@@ -138,7 +151,7 @@ class HubV3Client
         }
         return $source;
     }
-    
+
     private function parseShares($node)
     {
         $shares = [];
@@ -168,27 +181,27 @@ class HubV3Client
         }
         $body = $this->sendRequest($uri, null);
         //echo($body);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseResourcesXmlToResources($node);
     }
-    
+
     public function getResource($key)
     {
         $resources = array();
         $uri = '/resources/' . $key;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseResourceXmlToResource($node);
     }
-    
+
     public function getPicture($key)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/picture';
         $body = $this->sendRequest($uri, null);
-        
+
         return $body;
     }
 
@@ -200,17 +213,17 @@ class HubV3Client
           $uri .= '?accept=' . $accept;
         }
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseSource($node);
     }
-    
+
     public function getShares($key)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/shares';
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         return $this->parseShares($node);
     }
@@ -220,55 +233,79 @@ class HubV3Client
         $resources = array();
         $uri = '/resources/' . $key . '/shares/add/' . $grantee . '/' . $permission;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         // TODO: Validate status=OK?
         return true;
     }
-    
+
     public function removeShare($key, $grantee)
     {
         $resources = array();
         $uri = '/resources/' . $key . '/shares/remove/' . $grantee;
         $body = $this->sendRequest($uri, null);
-        
+
         $node = $this->parseXml((string)$body);
         // TODO: Validate status=OK?
         return true;
     }
-    
+
     public function register(Resource $resource)
     {
         $resources = array();
         $xml = $this->buildRegisterXml($resource);
         //exit($xml);
-    
+
         $body = $this->sendRequest('/register', $xml);
-        
+
         $rootNode = @simplexml_load_string($body);
         if (!$rootNode || ($rootNode->getName() != 'status') || ((string)$rootNode != 'OK')) {
             throw new RuntimeException("Did not receive OK status: " . $body);
         }
         return (string)$rootNode['key'];
     }
-    
+
     private function buildRegisterXml(Resource $resource)
     {
         $resourceNode = new SimpleXMLElement('<resource type="' .  $resource->getType() . '" />');
         foreach ($resource->getProperties() as $property) {
             $resourceNode->addChild('property', $property->getValue())->addAttribute('name', $property->getName());
         }
-        
+
         foreach ($resource->getShares() as $share) {
             $shareNode = $resourceNode->addChild('share');
             $shareNode->addChild('name', $share->getName());
             $shareNode->addChild('identifier', $share->getIdentifier())->addAttribute('type', $share->getIdentifierType());
             $shareNode->addChild('permission', $share->getPermission());
         }
-        
+
         //echo $clientNode->asXML();
         $dom = dom_import_simplexml($resourceNode)->ownerDocument;
         $dom->formatOutput = true;
         return $dom->saveXML();
+    }
+
+    /*
+     * The purpose of this method is to maintain backaward compatability
+     * as regard to the use of a hardcoded certificate store which is checked
+     * for existence before every request is sent, whilst also allowing the
+     * value to be given in the constructor as a string or boolean (see the
+     * \GuzzleHttp\RequestOptions::VERIFY option and
+     * https://curl.haxx.se/docs/caextract.html for more info).
+     *
+     * @retun bool|string
+     *
+     * @throws RuntimeException
+     */
+    private function getTlsCertificateVerification()
+    {
+        if (is_string($this->tlsCertVerification)
+            && (!file_exists($this->tlsCertVerification) || !is_file($this->tlsCertVerification))
+        ) {
+            throw new RuntimeException(
+                "cacert.pem not found: {$this->tlsCertVerification}"
+            );
+        }
+        return $this->tlsCertVerification;
     }
 }

@@ -38,6 +38,43 @@ php examples/v1/getdossierinfo.php {bsn}
 php examples/v3/search.php client_bsn=987654321
 ```
 
+## Build the v4 API client
+
+The v4 API Client authenticates itself with the Hub using a Json Web Token (JWT)
+which it obtains from UserBase.  The username and password you usually use to
+authenticate with the Hub are used to authenticate with UserBase and obtain a
+JWT.  Thereafter, the v4 client is used in the same way as the v3 client.
+
+```php
+use Hub\Client\Exception\ClientCreationException;
+use Hub\Client\Exception\ResponseException;
+use Hub\Client\Factory\ApiClientFactory;
+
+require_once '/path/to/vendor/autoload.php';
+
+$userbaseUrl = 'http://userbase.example.com/auth';
+$hubUrl = 'http://hub.example.com';
+$username = 'my-username';
+$password = 'my-password';
+
+$clientFactory = new ApiClientFactory($hubUrl);
+$clientFactory->setUserbaseJwtAuthenticatorUrl($userbaseUrl);
+try {
+    $client = $clientFactory->createV4Client($username, $password);
+} catch (ClientCreationException $e) {
+    // failed to create the client: probably failed to obtain a JWT
+    echo $e->getMessage() . PHP_EOL;
+    exit();
+}
+try {
+    $resources = $client->findResources();
+} catch (ResponseException $e) {
+    echo $e->getMessage() . PHP_EOL;
+    exit();
+}
+var_dump($resources);
+```
+
 ## cacert.pem
 
 For Guzzle versions > 4, curl is used to verify remote SSL connections.

@@ -2,17 +2,20 @@
 
 namespace Hub\Client\Common;
 
+use RuntimeException;
+
+use Psr\Http\Message\ResponseInterface;
+
 use Hub\Client\Exception\BadRequestException;
 use Hub\Client\Exception\NotFoundException;
 use Hub\Client\Exception\NotAuthorizedException;
-use RuntimeException;
 
 class ErrorResponseHandler
 {
-    public static function handle($response)
+    public static function handle(ResponseInterface $response)
     {
         if ($response->getStatusCode() == 401) {
-            throw new NotAuthorizedException('NOT_AUTHORIZED', 'Basic auth failed');
+            throw new NotAuthorizedException('NOT_AUTHORIZED', 'Authentication failure.');
         }
 
         $xml = $response->getBody();
