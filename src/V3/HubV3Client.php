@@ -165,23 +165,94 @@ class HubV3Client
         return $shares;
     }
 
+    /**
+     * Get a list of Resources which are shared with the current Account.
+     *
+     * @param array $filters
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
+    public function findResourcesSharedwithAccount($filters = array())
+    {
+        return $this->listResources($filters, 'shared_with');
+    }
+
+    /**
+     * Get a list of Resources which are owned by the current Account.
+     *
+     * The owner is the subject of the resources.
+     *
+     * @param array $filters
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
+    public function findResourcesOwnedByAccount($filters = array())
+    {
+        return $this->listResources($filters, 'owned_by');
+    }
+
+    /**
+     * Get a list of Resources which are provided by the current Account and its
+     * associated Organisation Accounts.
+     *
+     * @param array $filters
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
+    public function findResourcesProvidedByAccountAndOrgAccounts($filters = array())
+    {
+        return $this->listResources($filters, 'provided_by');
+    }
+
+    /**
+     * Get a list of Resources which are shared with the current Account and its
+     * associated Organisation Accounts.
+     *
+     * @param array $filters
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
+    public function findResourcesSharedWithAccountAndOrgAccounts($filters = array())
+    {
+        return $this->listResources($filters);
+    }
+
+    /**
+     * Get a list of Resources which are shared with the current Account and its
+     * associated Organisation Accounts.
+     *
+     * @param array $filters
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
     public function findResources($filters = array())
     {
-        $resources = array();
-        $uri = '/resources';
-        $first = true;
-        foreach ($filters as $key => $value) {
-            if ($first) {
-                $uri .= '?';
-            } else {
-                $uri .= '&';
-            }
-            $uri .= $key . '=' . $value;
-            $first = false;
-        }
-        $body = $this->sendRequest($uri, null);
-        //echo($body);
+        return $this->findResourcesSharedWithAccountAndOrgAccounts($filters);
+    }
 
+    /**
+     * Get a list of Resources.
+     *
+     * @param array $filters
+     * @param null|string one of 'shared_with', 'owned_by' and 'provided_by'
+     *
+     * @return \Hub\Client\Model\Resource[]
+     */
+    private function listResources($filters = array(), $listType = null)
+    {
+        $uri = '/resources';
+        $query = array();
+        if ($listType) {
+            $query[] = $listType;
+        }
+        foreach ($filters as $name => $value) {
+            $query[] = "{$name}={$value}";
+        }
+
+        if (sizeof($query)) {
+            $uri .= '?' . implode('&', $query);
+        }
+        $body = $this->sendRequest($uri);
         $node = $this->parseXml((string)$body);
         return $this->parseResourcesXmlToResources($node);
     }
