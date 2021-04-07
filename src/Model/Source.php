@@ -42,5 +42,45 @@ class Source
         $this->jwt = $jwt;
         return $this;
     }
+
+    private $providerAccount;
+    
+    public function getProviderAccount()
+    {
+        return $this->providerAccount;
+    }
+    
+    public function setProviderAccount($providerAccount)
+    {
+        $this->providerAccount = $providerAccount;
+        return $this;
+    }
+    
+    private $providerDisplayName;
+    
+    public function getProviderDisplayName()
+    {
+        return $this->providerDisplayName;
+    }
+    
+    public function setProviderDisplayName($providerDisplayName)
+    {
+        $this->providerDisplayName = $providerDisplayName;
+        return $this;
+    }
+
+    private $providerXillionDomain;
+    
+    public function getProviderXillionDomain()
+    {
+        return $this->providerXillionDomain;
+    }
+    
+    public function setProviderXillionDomain($providerXillionDomain)
+    {
+        $this->providerXillionDomain = $providerXillionDomain;
+        return $this;
+    }
+    
     
 }

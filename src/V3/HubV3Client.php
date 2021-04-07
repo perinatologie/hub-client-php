@@ -146,6 +146,9 @@ class HubV3Client
         $source = new Source();
         $source->setUrl((string)$node->url);
         $source->setApi((string)$node->api);
+        $source->setProviderAccount((string)$node->provider->account ?? null);
+        $source->setProviderDisplayName((string)$node->provider->displayName ?? null);
+        $source->setProviderXillionDomain((string)$node->provider->xillionDomain ?? null);
         if ($node->jwt) {
             $source->setJwt((string)$node->jwt);
         }
