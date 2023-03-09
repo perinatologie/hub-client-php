@@ -9,6 +9,7 @@ use Hub\Client\Model\Share;
 use Hub\Client\Common\ErrorResponseHandler;
 use Hub\Client\Exception\NoResponseException;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\HttpFactory;
 use RuntimeException;
 use SimpleXMLElement;
 
@@ -18,6 +19,7 @@ class HubV3Client
     private $password;
     private $tlsCertVerification;
 
+    protected $httpFactory;
     protected $httpClient;
     protected $url;
 
@@ -31,6 +33,7 @@ class HubV3Client
         $this->username = $username;
         $this->password = $password;
         $this->url = rtrim($url, '/') . '/v3';
+        $this->httpFactory = new HttpFactory();
         $this->httpClient = new GuzzleClient(
             [
                 'headers' => $headers
@@ -56,7 +59,7 @@ class HubV3Client
             $fullUrl = $this->url . $uri;
             $headers = array();
             if ($postData) {
-                $stream = \GuzzleHttp\Stream\Stream::factory($postData);
+                $stream = $this->httpFactory->createStream($postData);
                 $res = $this->httpClient->post(
                     $fullUrl,
                     [

@@ -7,6 +7,7 @@ use Hub\Client\Model\Source;
 use Hub\Client\Model\Property;
 use Hub\Client\Common\ErrorResponseHandler;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\HttpFactory;
 use RuntimeException;
 use SimpleXMLElement;
 
@@ -16,6 +17,7 @@ class HubV1Client
     private $password;
     private $url;
     private $httpClient;
+    private $httpFactory;
 
     public function __construct($username, $password, $url)
     {
@@ -23,6 +25,7 @@ class HubV1Client
         $this->password = $password;
         $this->url = rtrim($url, '/');
         $this->httpClient = new GuzzleClient();
+        $this->httpFactory = new HttpFactory();
     }
 
     private function sendRequest($uri, $postData = null)
@@ -44,7 +47,7 @@ class HubV1Client
             ];
 
             if ($postData) {
-                $stream = \GuzzleHttp\Stream\Stream::factory($postData);
+                $stream = $this->httpFactory->createStream($postData);
                 $res = $this->httpClient->post(
                     $fullUrl,
                     ['headers' => $headers, 'body' => $stream]

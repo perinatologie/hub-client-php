@@ -5,7 +5,7 @@ namespace Hub\Client\V4;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Stream\Stream;
+use GuzzleHttp\Psr7\HttpFactory;
 use Hub\Client\Common\ErrorResponseHandler;
 use Hub\Client\Exception\NoResponseException;
 use Hub\Client\V3\HubV3Client;
@@ -30,7 +30,7 @@ class HubV4Client extends HubV3Client
     {
         $requestOpts = [];
         if ($postData) {
-            $requestOpts['body'] = Stream::factory($postData);
+            $requestOpts['body'] = (new HttpFactory)->createStream($postData);
         }
 
         try {
