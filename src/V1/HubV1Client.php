@@ -16,7 +16,7 @@ class HubV1Client
     private $password;
     private $url;
     private $httpClient;
-    
+
     public function __construct($username, $password, $url)
     {
         $this->username = $username;
@@ -24,7 +24,7 @@ class HubV1Client
         $this->url = rtrim($url, '/');
         $this->httpClient = new GuzzleClient();
     }
-    
+
     private function sendRequest($uri, $postData = null)
     {
         try {
@@ -33,16 +33,16 @@ class HubV1Client
             //$fullUrl = str_replace('https', 'http', $fullUrl);
             $hashSource = $fullUrl . $postData . $this->password;
             //echo "HASHING: $hashSource\n";
-            
+
             $securityHash = sha1($hashSource);
-            
+
             //echo "Requesting: $fullUrl\n";
-            
+
             $headers = [
                 'uuid' => $this->username,
                 'securityhash' => $securityHash
             ];
-            
+
             if ($postData) {
                 $stream = \GuzzleHttp\Stream\Stream::factory($postData);
                 $res = $this->httpClient->post(
@@ -94,25 +94,28 @@ class HubV1Client
                 }
             }
         }
+
         return $resources;
     }
+
     public function getDossierInfo($bsn)
     {
         $resources = array();
         $body = $this->sendRequest('/getdossierinfo/' . $bsn, null);
-        
+
         return $this->parseDossiersXmlToResources((string)$body);
     }
-    
+
     public function updateClientInfo(Resource $resource, $providerAgb = null)
     {
         $resources = array();
         $xml = $this->buildUpdateClientInfoXml($resource, $providerAgb);
-    
+
         $body = $this->sendRequest('/updateclientinfo', $xml);
+
         return $body;
     }
-    
+
     private function buildUpdateClientInfoXml(Resource $resource, $providerAgb = null)
     {
         $clientNode = new SimpleXMLElement('<client />');
@@ -128,7 +131,7 @@ class HubV1Client
         $eocNode->addChild('para', $resource->getPropertyValue('para'));
         $eocNode->addChild('starttimestamp', $resource->getPropertyValue('starttimestamp'));
         $eocNode->addChild('edd', $resource->getPropertyValue('edd'));
-        
+
         foreach ($resource->getShares() as $share) {
             $shareNode = $eocNode->addChild('teammember');
             $shareNode->addChild('name', $share->getName());
@@ -144,11 +147,12 @@ class HubV1Client
         if ($providerAgb) {
             $providerNode->addChild('agb', $providerAgb);
         }
-        
+
         //echo $clientNode->asXML();
-        
+
         $dom = dom_import_simplexml($clientNode)->ownerDocument;
         $dom->formatOutput = true;
+
         return $dom->saveXML();
     }
 }

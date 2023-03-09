@@ -93,7 +93,6 @@ class HubV3Client
         }
     }
 
-
     private function parseXml($xml)
     {
         $node = @simplexml_load_string($xml);
@@ -101,6 +100,7 @@ class HubV3Client
             //exit($xml);
             throw new RuntimeException("Failed to parse response as XML...\n");
         }
+
         return $node;
     }
 
@@ -128,6 +128,7 @@ class HubV3Client
 
             $resources[] = $resource;
         }
+
         return $resources;
     }
 
@@ -138,6 +139,7 @@ class HubV3Client
         foreach ($resourceNode->property as $propertyNode) {
             $resource->addPropertyValue($propertyNode['name'], (string)$propertyNode);
         }
+
         return $resource;
     }
 
@@ -152,6 +154,7 @@ class HubV3Client
         if ($node->jwt) {
             $source->setJwt((string)$node->jwt);
         }
+
         return $source;
     }
 
@@ -165,6 +168,7 @@ class HubV3Client
             $share->setPermission((string)$shareNode->permission);
             $shares[] = $share;
         }
+
         return $shares;
     }
 
@@ -356,6 +360,7 @@ class HubV3Client
         //echo $clientNode->asXML();
         $dom = dom_import_simplexml($resourceNode)->ownerDocument;
         $dom->formatOutput = true;
+
         return $dom->saveXML();
     }
 
@@ -380,6 +385,7 @@ class HubV3Client
                 "cacert.pem not found: {$this->tlsCertVerification}"
             );
         }
+
         return $this->tlsCertVerification;
     }
 }
