@@ -2,15 +2,13 @@
 
 namespace Hub\Client\Factory;
 
-use RuntimeException;
-
 use GuzzleHttp\Client as GuzzleClient;
-
 use Hub\Client\Exception\AuthenticationFailureException;
 use Hub\Client\Exception\ClientCreationException;
 use Hub\Client\Security\UserbaseJwtAuthenticatorClient;
 use Hub\Client\V3\HubV3Client;
 use Hub\Client\V4\HubV4Client;
+use RuntimeException;
 
 class ApiClientFactory
 {
@@ -22,6 +20,7 @@ class ApiClientFactory
     /**
      * @param string $hubUrl Base URL of Hub, e.g. http://hub.example.com
      * @param bool|string $tlsCertVerification as \GuzzleHttp\RequestOptions::VERIFY option
+     *
      * @paran array $requestHeaders default set of headers to be sent in requests
      *
      * @see \GuzzleHttp\RequestOptions::VERIFY
@@ -70,7 +69,7 @@ class ApiClientFactory
      * @param string $username
      * @param string $password
      *
-     * @throws \RuntimeException if setUserbaseJwtAuthenticatorUrl was not called
+     * @throws RuntimeException if setUserbaseJwtAuthenticatorUrl was not called
      * @throws \Hub\Client\Exception\ClientCreationException
      */
     public function createV4Client($username, $password)
@@ -104,6 +103,7 @@ class ApiClientFactory
                 ),
             ]
         );
+
         return new HubV4Client($httpClient);
     }
 

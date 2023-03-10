@@ -3,7 +3,6 @@
 namespace Hub\Client\Exception;
 
 use Exception;
-
 use Psr\Http\Message\ResponseInterface;
 
 /**

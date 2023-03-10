@@ -2,15 +2,13 @@
 
 namespace Hub\Client\Security;
 
-use RuntimeException;
-
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
-use Psr\Http\Message\ResponseInterface;
-
 use Hub\Client\Exception\AuthenticationFailureException;
+use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
 
 /**
  * Obtain from UserBase a Json Web Token with which to authenticate with the Hub.
@@ -112,6 +110,7 @@ class UserbaseJwtAuthenticatorClient
         if (!$json) {
             return null;
         }
+
         return $json;
     }
 
@@ -146,6 +145,7 @@ class UserbaseJwtAuthenticatorClient
         if (!isset($data['status']) || 'error' !== $data['status'] || !isset($data['code'])) {
             return null;
         }
+
         return $data['code'];
     }
 }

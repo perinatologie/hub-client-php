@@ -15,20 +15,18 @@ class ProviderClient
     private $username;
     private $password;
     private $httpClient;
-    
+
     public function __construct($username = null, $password = null)
     {
         $this->username = $username;
         $this->password = $password;
         $this->httpClient = new GuzzleClient();
-        
-        
+
         $this->verify = __DIR__ . '/../../cacert.pem';
         if (!file_exists($this->verify)) {
             throw new RuntimeException('cacert.pem not found: ' . $this->verify);
         }
     }
-
 
     public function getResourceData(Resource $resource, Source $source, $accept = null)
     {
@@ -42,7 +40,7 @@ class ProviderClient
                 throw new RuntimeException("Unsupported source API: " . $source->getApi());
         }
     }
-    
+
     private function getResourceDataV1(Resource $resource, Source $source)
     {
         if ($source->getUrl()) {
@@ -54,7 +52,7 @@ class ProviderClient
             }
             $bsn = $resource->getPropertyValue('client_bsn');
             $ref = $resource->getPropertyValue('reference');
-            
+
             switch ($resource->getType()) {
                 case 'perinatologie/dossier':
                     $url = $providerApiUrl . '/' . $bsn . '/' . rawurlencode($ref);
@@ -63,11 +61,10 @@ class ProviderClient
                     throw new RuntimeException("Unsupported resource type: " . $resource->getType());
             }
         }
-        
-        
+
         try {
             $hashSource = $url . $this->password;
-            
+
             $headers = array();
             //echo "REQUESTING PROVIDER URL: " . $url . "\n";
             if ($this->username || $this->password) {
@@ -112,7 +109,7 @@ class ProviderClient
             $url .= '&accept=' . $accept;
         }
         //echo "REQUESTING: $url\n";
-        
+
         try {
             $res = $this->httpClient->get(
                 $url,

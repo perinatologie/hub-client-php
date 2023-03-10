@@ -11,9 +11,9 @@ class SectionParser
     {
         //echo $xml; exit();
         $sections = [];
-        
+
         $rootNode = simplexml_load_string($xml);
-        
+
         foreach ($rootNode->forms->form as $formNode) {
             $section = $this->parseSection($formNode);
             $sections[] = $section;
@@ -24,9 +24,10 @@ class SectionParser
                 $sections[] = $section;
             }
         }
+
         return $sections;
     }
-    
+
     public function parseSection($formNode)
     {
         $section = new Section();
@@ -55,6 +56,7 @@ class SectionParser
                 $section->addValue($value);
             }
         }
+
         return $section;
     }
 }
