@@ -103,10 +103,12 @@ class ProviderClient
             //throw new RuntimeException("No source JWT to get resource data");
         }
         if ($jwt) {
-            $url .= "?jwt=". $jwt;
+            $separator = (parse_url($url, PHP_URL_QUERY) !== null) ? '&' : '?';
+            $url .= $separator . "jwt=" . $jwt;
         }
         if ($accept) {
-            $url .= '&accept=' . $accept;
+            $separator = (parse_url($url, PHP_URL_QUERY) !== null) ? '&' : '?';
+            $url .= $separator . 'accept=' . $accept;
         }
         //echo "REQUESTING: $url\n";
 
